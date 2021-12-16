@@ -6,7 +6,7 @@ public class AuthHandler : MessageHandler
 {
     public AuthHandler()
     {
-        this.commands.Add(Message.MESSAGE_TYPE_AUTH, processAuth);
+        commands.Add(Message.MESSAGE_TYPE_AUTH, processAuth);
     }
 
     public MessageResponse processAuth(string msg)
