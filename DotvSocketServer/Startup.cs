@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DotvSocketServer.domain;
+using DotvSocketServer.handler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,19 +16,27 @@ namespace DotvSocketServer
 {
     public class Startup
     {
+
+        private List<MessageHandler> handerlers;
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
         }
 
+        public void initHandlers()
+        {
+            handerlers = new List<MessageHandler>();
+            handerlers.Add(new AuthHandler());
+            handerlers.Add(new ChatHandler());
+        }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseDeveloperExceptionPage();
-            //}
+            initHandlers();
+            
             app.UseWebSockets();
             app.Use(async (context, next) =>
             {
@@ -47,12 +57,6 @@ namespace DotvSocketServer
                     await next();
                 }
             });
-
-            //app.UseRouting();
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Hello World!"); });
-            //});
         }
         
         public async Task ChatSocketHandler(HttpContext context, WebSocket webSocket)
@@ -64,9 +68,6 @@ namespace DotvSocketServer
                 string json = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 Message message = JsonSerializer.Deserialize<Message>(json);
                 await ProcessMessage(message, json, webSocket);
-                //get the message Type
-                //based on the message type do different things
-               
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
@@ -78,28 +79,29 @@ namespace DotvSocketServer
             var buffer = new ArraySegment<Byte>(encoded, 0, encoded.Length);
             await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
         }
+
+        public MessageHandler GetMessageHandler(int msgType)
+        {
+            foreach(MessageHandler handler in handerlers)
+            {
+                if (handler.HasMessageType(msgType))
+                {
+                    return handler;
+                }
+            }
+
+            return null;
+        }
         
         private async Task ProcessMessage(Message message, String json, WebSocket webSocket)
         {
-            switch (message.MessageType)
-            {
-                case 0: //auth message
-                    var authRequest = JsonSerializer.Deserialize<AuthRequest>(json);
-                    var authResponse = await ProcessAuthRequest(authRequest);
-                    //TODO: if this user is valid, add them to valid users
-                    //if (authResponse.Valid)
-                    //{
-                    //    addToValidUsers();
-                    //}
-                    await SendMessageToSocket(JsonSerializer.Serialize(authResponse), webSocket);
-                    break;
-                
-                case 1: //chat message
-                    break;
-                    
-                case 2: //heartbeat 
-                    break;
-            }
+            MessageHandler handler = GetMessageHandler(message.MessageType);
+            if (handler is null)
+                return;
+            
+            //TODO: message should return if the response is global or not...
+            Message response = handler.processMessage(message, json);
+            await SendMessageToSocket(JsonSerializer.Serialize(response), webSocket);
         }
 
         private async Task<AuthResponse> ProcessAuthRequest(AuthRequest authRequest)
