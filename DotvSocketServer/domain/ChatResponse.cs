@@ -1,6 +1,6 @@
 ﻿namespace DotvSocketServer.domain
 {
-    public class ChatResponse : Message
+    public class ChatResponse : MessageResponse
     {
         public string Message { get; set; }
         public string CharacterName { get; set; }

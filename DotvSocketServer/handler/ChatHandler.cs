@@ -10,7 +10,7 @@ public class ChatHandler : MessageHandler
         this.commands.Add(Message.MESSAGE_TYPE_HEARTBEAT, ProcessHeartBeat);
     }
     
-    private Message ProcessGlobalChatMessage(string msgContent)
+    private MessageResponse ProcessGlobalChatMessage(string msgContent)
     {
         return new ChatResponse();
     }
@@ -18,8 +18,8 @@ public class ChatHandler : MessageHandler
     /**
      * Just used to keep the connection alive
      */
-    private Message ProcessHeartBeat(string msgContent)
+    private MessageResponse ProcessHeartBeat(string msgContent)
     {
-        return new Message();
+        return new MessageResponse();
     }
 }

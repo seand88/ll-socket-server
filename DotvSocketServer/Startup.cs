@@ -89,7 +89,6 @@ namespace DotvSocketServer
                     return handler;
                 }
             }
-
             return null;
         }
         
@@ -99,9 +98,16 @@ namespace DotvSocketServer
             if (handler is null)
                 return;
             
-            //TODO: message should return if the response is global or not...
-            Message response = handler.processMessage(message, json);
-            await SendMessageToSocket(JsonSerializer.Serialize(response), webSocket);
+            MessageResponse response = handler.processMessage(message, json);
+            
+            if (response.IsGlobal) {
+                //TODO: send to all rooms
+            }else if (response.SendToRoom) {
+                //TODO: send to room specified by the id from the message
+            }else if (response.SendToUser) {
+                await SendMessageToSocket(JsonSerializer.Serialize(response), webSocket);
+            }
+            
         }
 
         private async Task<AuthResponse> ProcessAuthRequest(AuthRequest authRequest)

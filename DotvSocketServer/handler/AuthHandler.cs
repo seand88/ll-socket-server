@@ -9,7 +9,7 @@ public class AuthHandler : MessageHandler
         this.commands.Add(Message.MESSAGE_TYPE_AUTH, processAuth);
     }
 
-    public Message processAuth(string msg)
+    public MessageResponse processAuth(string msg)
     {
         AuthResponse response = new AuthResponse();
         response.Valid = true;

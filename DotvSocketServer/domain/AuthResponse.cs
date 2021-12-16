@@ -1,6 +1,6 @@
 ﻿namespace DotvSocketServer.domain
 {
-    public class AuthResponse : Message
+    public class AuthResponse : MessageResponse
     {
         public AuthResponse()
         {
