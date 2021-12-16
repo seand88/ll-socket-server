@@ -21,8 +21,12 @@ public class MessageHandler
 
     public MessageResponse processBadMessage(String message)
     {
-        //happens if message type not found, should log bad messages for security
-        return new MessageResponse();
+        //TODO: Log the bad message,
+        
+        //invalidated message wont have a response
+        MessageResponse response = new MessageResponse();
+        response.Invalidate();
+        return response;
     }
 
     public bool HasMessageType(int msgType)

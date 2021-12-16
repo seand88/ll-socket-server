@@ -15,6 +15,7 @@ public class AuthHandler : MessageHandler
         response.Valid = true;
         //TODO: actually make sure the user is valid by checking the token
         return response;
+        
     }
     
 }

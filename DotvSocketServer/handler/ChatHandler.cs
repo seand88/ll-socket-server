@@ -1,13 +1,12 @@
 using DotvSocketServer.domain;
-
 namespace DotvSocketServer.handler;
 
 public class ChatHandler : MessageHandler
 {
     public ChatHandler()
     {
-        this.commands.Add(Message.MESSAGE_TYPE_CHAT, ProcessGlobalChatMessage);
-        this.commands.Add(Message.MESSAGE_TYPE_HEARTBEAT, ProcessHeartBeat);
+        commands.Add(Message.MESSAGE_TYPE_CHAT, ProcessGlobalChatMessage);
+        commands.Add(Message.MESSAGE_TYPE_HEARTBEAT, ProcessHeartBeat);
     }
     
     private MessageResponse ProcessGlobalChatMessage(string msgContent)
@@ -20,6 +19,9 @@ public class ChatHandler : MessageHandler
      */
     private MessageResponse ProcessHeartBeat(string msgContent)
     {
-        return new MessageResponse();
+        //invalidated message wont have a response
+        MessageResponse response = new MessageResponse();
+        response.Invalidate();
+        return response;
     }
 }
